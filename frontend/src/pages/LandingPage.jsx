@@ -224,7 +224,10 @@ export default function LandingPage() {
           </div>
 
           {/* RIGHT: MULTI-RING BRAIN ORBIT */}
-          <div className="lg:w-1/2 relative flex justify-center items-center h-[600px] w-full z-10 perspective-1000">
+          <div className="lg:w-1/2 relative flex justify-center items-center h-[350px] sm:h-[450px] md:h-[550px] lg:h-[600px] w-full z-10 perspective-1000 overflow-visible">
+             
+             {/* Wrapper with responsive scale */}
+             <div className="absolute inset-0 flex items-center justify-center scale-[0.5] sm:scale-[0.65] md:scale-[0.85] lg:scale-100 transition-transform duration-500">
              
              {/* Center Glow */}
              <div className="absolute w-[150px] h-[150px] rounded-full bg-purple-600/30 blur-[80px] animate-pulse"></div>
@@ -348,7 +351,8 @@ export default function LandingPage() {
                      />
                  ))}
              </div>
-
+             
+             </div> {/* End of scale wrapper */}
           </div>
       </header>
 

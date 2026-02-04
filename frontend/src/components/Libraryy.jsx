@@ -108,14 +108,14 @@ export default function Library() {
         isMobile={isMobile}
       />
 
-      <div className="flex-1 md:ml-64">
+      <div className={`flex-1 transition-all ${!isMobile ? "md:ml-64" : ""}`}>
         <Navbar toggleSidebar={() => setIsOpen(!isOpen)} username={username} email={email} />
 
-        <div className="px-6 pt-24 pb-10 max-w-7xl mx-auto">
+        <div className="px-4 sm:px-6 pt-24 pb-10 max-w-7xl mx-auto">
           {/* HERO */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl p-8 text-white flex justify-between items-center">
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl p-6 sm:p-8 text-white flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
             <div>
-              <h1 className="text-3xl font-bold">Community Library</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold">Community Library</h1>
               <p className="text-sm opacity-90">
                 Shared study materials from all users
               </p>
@@ -130,7 +130,7 @@ export default function Library() {
           </div>
 
           {/* FILE GRID */}
-          <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+          <div className="mt-8 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
             {files.map((item) => (
               <div
                 key={item._id}

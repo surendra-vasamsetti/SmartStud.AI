@@ -1,6 +1,9 @@
 import { getStudentMemory } from './agentMemory';
 import { getConversationHistory } from './conversationStorage';
 import { getAllQuizResults } from '../utils/quizTracking';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 /**
  * Generate AI response with full student context
@@ -150,7 +153,7 @@ Generate a warm, personalized greeting (2-3 sentences max).
 Reference their streak if > 0, or encourage them if new.
 Ask what they'd like to work on today.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(prompt);
     return result.response.text();
   } catch (error) {

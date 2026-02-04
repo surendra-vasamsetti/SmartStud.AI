@@ -7,7 +7,7 @@ const SettingsContext = createContext();
 const defaultSettings = {
   learning: {
     difficultyLevel: 'intermediate',
-    aiModel: 'gemini-2.0-flash',
+    aiModel: 'gemini-2.5-flash',
     defaultStudyMode: 'flashcards',
     autoSave: true
   },

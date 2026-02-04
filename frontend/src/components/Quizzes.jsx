@@ -367,10 +367,10 @@ Keep it concise, positive, and actionable. Maximum 150 words.
   /* ---------------- UI ---------------- */
   return (
     <Layout>
-      <div className="flex justify-center pt-8 pb-10">
+      <div className="flex justify-center pt-4 pb-6 sm:pt-8 sm:pb-10">
           {/* STEP 1 */}
           {step === 1 && (
-            <div className="w-full max-w-xl bg-white p-8 rounded-3xl shadow-soft">
+            <div className="w-full max-w-xl bg-white p-6 sm:p-8 rounded-3xl shadow-soft">
               <h2 className="text-2xl font-bold text-soft-text text-center mb-6 flex items-center justify-center gap-2">
                 <Target className="w-8 h-8 text-soft-primary" /> Select Topic & Level
               </h2>
@@ -410,7 +410,7 @@ Keep it concise, positive, and actionable. Maximum 150 words.
 
           {/* STEP 2 */}
           {step === 2 && (
-            <div className="w-full max-w-xl bg-white p-8 rounded-3xl shadow-soft max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div className="w-full max-w-xl bg-white p-6 sm:p-8 rounded-3xl shadow-soft max-h-[70vh] overflow-y-auto custom-scrollbar">
               <h2 className="text-xl font-bold mb-6 text-center flex items-center justify-center gap-2 text-soft-text">
                 <BookOpen className="w-6 h-6 text-blue-500" /> Learning Roadmap
               </h2>
@@ -441,7 +441,7 @@ Keep it concise, positive, and actionable. Maximum 150 words.
 
           {/* STEP 3 */}
           {step === 3 && quiz.length > 0 && (
-            <div className="w-full max-w-xl bg-white p-8 rounded-3xl shadow-soft">
+            <div className="w-full max-w-xl bg-white p-6 sm:p-8 rounded-3xl shadow-soft">
               <div className="flex justify-between mb-4 text-sm font-medium text-gray-500">
                 <span>Question {currentQ + 1} of {quiz.length}</span>
                 <span>
@@ -494,7 +494,7 @@ Keep it concise, positive, and actionable. Maximum 150 words.
           {step === 4 && result && (
             <div className="w-full max-w-5xl space-y-8">
               {/* Summary Card */}
-              <div className="bg-white p-10 rounded-3xl shadow-soft text-center">
+              <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-soft text-center">
                  <div className="inline-flex items-center justify-center p-4 bg-soft-primary/10 rounded-full mb-6">
                     {percent === 100 ? <Trophy className="w-12 h-12 text-yellow-500" /> : percent >= 70 ? <Star className="w-12 h-12 text-soft-primary" /> : <BarChart2 className="w-12 h-12 text-soft-primary" />}
                  </div>

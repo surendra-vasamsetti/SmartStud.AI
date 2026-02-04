@@ -12,7 +12,8 @@ import {
   Sparkles,
   MessageSquare,
   Copy,
-  X 
+  X,
+  Plus
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -64,6 +65,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showFeatureMenu, setShowFeatureMenu] = useState(false);
 
 
 
@@ -225,168 +227,302 @@ export default function Dashboard() {
         isMobile={isMobile}
       />
 
-      <div className={`flex-1 transition-all ${!isMobile ? "md:ml-64" : ""}`}>
+      <div className={`flex-1 transition-all flex flex-col ${!isMobile ? "md:ml-64" : ""}`}>
         <Navbar
           toggleSidebar={() => setIsOpen((p) => !p)}
           username={username}
           email={email}
         />
 
-        <motion.div
-           initial={{ opacity: 0 }}
-           animate={{ opacity: 1 }}
-           className="pt-24 px-6 flex flex-col items-center"
-        >
-          <div className="w-fit mx-auto text-left">
-            <motion.h1 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="font-cursive text-5xl md:text-6xl font-bold tracking-wide leading-tight bg-clip-text text-transparent bg-[linear-gradient(110deg,#9333ea,45%,#ec4899,55%,#9333ea)] bg-[length:250%_100%] animate-shimmer drop-shadow-sm"
-            >
-              Hello {username}<span className="text-violet-600 inline-block animate-pulse">!</span>
-            </motion.h1>
+        {/* MAIN SCROLLABLE CONTENT */}
+        {/* MAIN SCROLLABLE CONTENT */}
+        {/* MAIN SCROLLABLE CONTENT */}
+        <div className={`flex-1 flex flex-col items-center w-full ${isMobile ? 'h-full relative overflow-x-hidden' : 'justify-start pt-16 sm:pt-24 px-6 scale-95 origin-top'}`}>
             
-            <h2 
-              className="font-cursive text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-soft-primary via-purple-500 to-indigo-600 ml-24 opacity-0 animate-blur-in"
-              style={{ animationDelay: "0.2s" }}
-            >
-              Chat with Stud
-            </h2>
-          </div>
-        </motion.div>
-
-        {/* History Toggle Button - Fixed Top Right */}
-        <button
-          onClick={() => setShowHistory(!showHistory)}
-          className="fixed top-24 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-lg hover:shadow-xl transition font-semibold text-gray-700 hover:text-purple-600 border-2 border-purple-200"
-        >
-          <History size={20} />
-          <span className="hidden sm:inline">{showHistory ? "Hide" : "History"}</span>
-        </button>
-
-        {/* ================= SEARCH ================= */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="max-w-3xl mx-auto mt-8 px-6"
-        >
-          <div className="flex bg-white rounded-full shadow-lg px-6 py-4 gap-3">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Describe what you want to learn..."
-              className="flex-1 outline-none text-lg"
-              onKeyDown={(e) => e.key === "Enter" && askGemini()}
-            />
-            <button
-              onClick={() => askGemini()}
-              disabled={loading || !query.trim()}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-full font-semibold"
-            >
-              {loading ? "Thinking..." : "Ask AI"}
-            </button>
-          </div>
-
-
-          {/* Feature Navigation Buttons (Below Search) */}
-          <div className="flex flex-wrap gap-4 mt-6 justify-center">
-            <button
-              onClick={() => {
-                if (!response) {
-                  alert("Please ask a question first to generate a Mind Map!");
-                  return;
-                }
-                navigate("/mindmap", { state: { response } });
-              }}
-              className="flex items-center gap-2 px-6 py-3 bg-white border border-indigo-100 rounded-xl shadow-sm hover:shadow-md hover:bg-indigo-50 transition text-indigo-700 font-semibold"
-            >
-              <Network size={20} /> Mind Map
-            </button>
-            
-            <button
-               onClick={() => {
-                if (!response) {
-                  alert("Please ask a question first to generate Flashcards!");
-                  return;
-                }
-                navigate("/flashcards", { state: { response } });
-              }}
-              className="flex items-center gap-2 px-6 py-3 bg-white border border-blue-100 rounded-xl shadow-sm hover:shadow-md hover:bg-blue-50 transition text-blue-700 font-semibold"
-            >
-              <StickyNote size={20} /> Flashcards
-            </button>
-            
-            <button
-               onClick={() => {
-                if (!response) {
-                  alert("Please ask a question first to generate a Quiz!");
-                  return;
-                }
-                navigate("/quiz-generator", { state: { response } });
-              }}
-              className="flex items-center gap-2 px-6 py-3 bg-white border border-green-100 rounded-xl shadow-sm hover:shadow-md hover:bg-green-50 transition text-green-700 font-semibold"
-            >
-              <FileQuestion size={20} /> Quiz
-            </button>
-            
-            <button
-              onClick={clearResponse}
-              disabled={!response}
-              className="flex items-center gap-2 px-6 py-3 bg-white border border-red-100 rounded-xl shadow-sm hover:shadow-md hover:bg-red-50 transition text-red-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Trash2 size={20} /> Clear
-            </button>
-          </div>
-        </motion.div>
-
-        {/* ================= AI RESPONSE ================= */}
-        {response && (
-          <motion.div
-            initial={{ opacity: 0, y: 30, rotateX: -10 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{ duration: 0.6 }}
-            className="px-6 mt-10 mb-10"
-          >
-            <div className="mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden max-w-5xl border border-gray-100">
-              {/* Header with copy button */}
-              <div className="bg-gradient-to-r from-gray-50 to-white px-8 py-4 flex items-center justify-between border-b border-gray-200">
-                <div className="flex items-center gap-3">
-                  <div className="bg-purple-100 p-2 rounded-lg">
-                    <Bot size={24} className="text-purple-600" />
-                  </div>
-                  <h2 className="text-lg font-bold text-gray-800">AI Response</h2>
-                </div>
-                
-                <button
-                  onClick={copyToClipboard}
-                  className="flex items-center gap-2 text-gray-500 hover:text-purple-600 px-3 py-1.5 rounded-lg transition text-sm hover:bg-purple-50"
+            {/* MOBILE GREETING (CENTERED) */}
+            {isMobile && !response && (
+              <div className="flex-1 w-full flex flex-col items-center justify-center px-4" style={{ minHeight: 'calc(100vh - 180px)' }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center pb-20"
                 >
-                  {copied ? (
-                    <>
-                      <Check size={16} />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={16} />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </button>
+                  <motion.h1 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="font-cursive text-4xl font-bold tracking-wide leading-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-[length:200%_auto] animate-shimmer drop-shadow-sm px-2 mb-0"
+                    style={{ WebkitTextFillColor: 'transparent', display: 'inline-block' }}
+                  >
+                    Hello {username || "Surendra"}<span className="text-violet-600 inline-block animate-pulse">!</span>
+                  </motion.h1>
+                  
+                  <h2 
+                    className="font-cursive text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-soft-primary to-indigo-600 opacity-0 animate-blur-in mt-0"
+                    style={{ animationDelay: "0.2s", WebkitTextFillColor: 'transparent' }}
+                  >
+                    Chat with Stud
+                  </h2>
+                </motion.div>
               </div>
+            )}
 
-              {/* Content Area */}
-              <div className="p-8">
-                 <MarkdownRenderer content={response} />
+            {/* DESKTOP CONTENT & MOBILE RESPONSE */}
+            {(response || !isMobile) && (
+              <div className={`w-full max-w-4xl flex flex-col items-center ${isMobile ? 'px-4 pb-40 pt-10' : ''}`}>
+                {!isMobile && (
+                  <div className="text-center mb-8">
+                     <motion.h1 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="font-cursive text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-wide leading-tight bg-clip-text text-transparent bg-[linear-gradient(110deg,#9333ea,45%,#ec4899,55%,#9333ea)] bg-[length:250%_100%] animate-shimmer drop-shadow-sm px-2"
+                      >
+                        Hello {username}<span className="text-violet-600 inline-block animate-pulse">!</span>
+                      </motion.h1>
+                      
+                      <h2 
+                        className="font-cursive text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-soft-primary via-purple-500 to-indigo-600 mt-3 opacity-0 animate-blur-in"
+                        style={{ animationDelay: "0.2s" }}
+                      >
+                        Chat with Stud
+                      </h2>
+                  </div>
+                )}
+
+                {/* Desktop Search Bar */}
+                {!isMobile && !response && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="w-full max-w-2xl mb-8"
+                  >
+                    <div className="flex bg-white rounded-full shadow-lg px-6 py-4 gap-3 border border-gray-100 focus-within:ring-2 focus-within:ring-purple-200 transition-all">
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Describe what you want to learn..."
+                        className="flex-1 outline-none text-lg bg-transparent"
+                        onKeyDown={(e) => e.key === "Enter" && askGemini()}
+                      />
+                      <button
+                        onClick={() => askGemini()}
+                        disabled={loading || !query.trim()}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-full font-semibold whitespace-nowrap disabled:opacity-50 hover:shadow-md transition-all"
+                      >
+                        {loading ? "..." : "Ask AI"}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Desktop Features */}
+                {!isMobile && !response && (
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 justify-center w-full max-w-2xl px-2">
+                    <button
+                      onClick={() => {
+                        if (!response) {
+                          alert("Please ask a question first to generate a Mind Map!");
+                          return;
+                        }
+                        navigate("/mindmap", { state: { response } });
+                      }}
+                      className="flex flex-col sm:flex-row items-center justify-center gap-2 p-4 bg-white border border-indigo-100 rounded-2xl shadow-sm hover:shadow-md hover:bg-indigo-50 transition text-indigo-700 font-medium text-sm sm:text-base aspect-[2/1] sm:aspect-auto"
+                    >
+                      <Network size={24} className="mb-1 sm:mb-0 sm:w-5 sm:h-5 text-indigo-500" /> 
+                      <span>Mind Map</span>
+                    </button>
+                    
+                    <button
+                       onClick={() => {
+                        if (!response) {
+                          alert("Please ask a question first to generate Flashcards!");
+                          return;
+                        }
+                        navigate("/flashcards", { state: { response } });
+                      }}
+                      className="flex flex-col sm:flex-row items-center justify-center gap-2 p-4 bg-white border border-blue-100 rounded-2xl shadow-sm hover:shadow-md hover:bg-blue-50 transition text-blue-700 font-medium text-sm sm:text-base aspect-[2/1] sm:aspect-auto"
+                    >
+                      <StickyNote size={24} className="mb-1 sm:mb-0 sm:w-5 sm:h-5 text-blue-500" /> 
+                      <span>Flashcards</span>
+                    </button>
+                    
+                    <button
+                       onClick={() => {
+                        if (!response) {
+                          alert("Please ask a question first to generate a Quiz!");
+                          return;
+                        }
+                        navigate("/quiz-generator", { state: { response } });
+                      }}
+                      className="flex flex-col sm:flex-row items-center justify-center gap-2 p-4 bg-white border border-green-100 rounded-2xl shadow-sm hover:shadow-md hover:bg-green-50 transition text-green-700 font-medium text-sm sm:text-base aspect-[2/1] sm:aspect-auto"
+                    >
+                      <FileQuestion size={24} className="mb-1 sm:mb-0 sm:w-5 sm:h-5 text-green-500" /> 
+                      <span>Quiz Generator</span>
+                    </button>
+                    
+                     <button
+                      onClick={clearResponse}
+                      disabled={!response}
+                      className="flex flex-col sm:flex-row items-center justify-center gap-2 p-4 bg-white border border-red-100 rounded-2xl shadow-sm hover:shadow-md hover:bg-red-50 transition text-red-700 font-medium text-sm sm:text-base aspect-[2/1] sm:aspect-auto disabled:opacity-50"
+                    >
+                      <Trash2 size={24} className="mb-1 sm:mb-0 sm:w-5 sm:h-5 text-red-500" /> 
+                      <span>Clear</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* AI RESPONSE */}
+                {response && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="w-full"
+                  >
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                      <div className="bg-gradient-to-r from-gray-50 to-white px-4 py-3 flex items-center justify-between border-b border-gray-200">
+                        <div className="flex items-center gap-2">
+                          <div className="bg-purple-100 p-1.5 rounded-lg">
+                            <Bot size={20} className="text-purple-600" />
+                          </div>
+                          <h2 className="text-sm sm:text-base font-bold text-gray-800">Stud AI</h2>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                            <button
+                              onClick={copyToClipboard}
+                              className="flex items-center gap-1 text-gray-500 hover:text-purple-600 px-2 py-1 rounded hover:bg-purple-50 transition text-xs"
+                            >
+                              {copied ? <Check size={14} /> : <Copy size={14} />}
+                              <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+                            </button>
+                            <button
+                              onClick={clearResponse}
+                              className="flex items-center gap-1 text-gray-500 hover:text-red-500 px-2 py-1 rounded hover:bg-red-50 transition text-xs"
+                            >
+                              <Trash2 size={14} />
+                              <span className="hidden sm:inline">Clear</span>
+                            </button>
+                        </div>
+                      </div>
+        
+                      <div className="p-4 sm:p-6 md:p-8 text-left">
+                         <MarkdownRenderer content={response} />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
               </div>
+            )}
+        </div>
+
+
+        {/* ================= MOBILE BOTTOM SEARCH BAR (ONLY MOBILE) ================= */}
+        {isMobile && (
+          <div className="bg-white/80 backdrop-blur-md border-t border-gray-200 p-3 pb-6 fixed bottom-0 left-0 right-0 z-30">
+            <div className="max-w-3xl mx-auto">
+                <div className="flex items-center bg-gray-100 rounded-full px-1.5 py-1.5 shadow-inner border border-gray-200 focus-within:border-gray-400 focus-within:ring-1 focus-within:ring-gray-300 transition-all">
+                  {/* PLUS BUTTON */}
+                  <div className="relative shrink-0">
+                    <button
+                      onClick={() => setShowFeatureMenu(!showFeatureMenu)}
+                      className="w-9 h-9 flex items-center justify-center bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
+                    >
+                      <Plus size={18} />
+                    </button>
+                    {/* FEATURE MENU POPOVER */}
+                    {showFeatureMenu && (
+                      <div className="absolute bottom-full left-0 mb-3 w-48 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-bottom-left">
+                        <button
+                           onClick={() => {
+                            setShowFeatureMenu(false);
+                            if (!response) {
+                              alert("Please ask a question first to generate a Mind Map!");
+                              return;
+                            }
+                            navigate("/mindmap", { state: { response } });
+                          }}
+                          className="flex items-center gap-3 p-3 hover:bg-indigo-50 border-b border-gray-100/50 text-left transition-colors"
+                        >
+                          <div className="bg-indigo-100 p-1.5 rounded-lg text-indigo-600"><Network size={16} /></div>
+                          <span className="text-sm font-medium text-gray-700">Mind Map</span>
+                        </button>
+                        
+                        <button
+                           onClick={() => {
+                            setShowFeatureMenu(false);
+                            if (!response) {
+                              alert("Please ask a question first to generate Flashcards!");
+                              return;
+                            }
+                            navigate("/flashcards", { state: { response } });
+                          }}
+                          className="flex items-center gap-3 p-3 hover:bg-blue-50 border-b border-gray-100/50 text-left transition-colors"
+                        >
+                          <div className="bg-blue-100 p-1.5 rounded-lg text-blue-600"><StickyNote size={16} /></div>
+                          <span className="text-sm font-medium text-gray-700">Flashcards</span>
+                        </button>
+                        <button
+                           onClick={() => {
+                            setShowFeatureMenu(false);
+                            if (!response) {
+                              alert("Please ask a question first to generate a Quiz!");
+                              return;
+                            }
+                            navigate("/quiz-generator", { state: { response } });
+                          }}
+                          className="flex items-center gap-3 p-3 hover:bg-green-50 text-left transition-colors"
+                        >
+                          <div className="bg-green-100 p-1.5 rounded-lg text-green-600"><FileQuestion size={16} /></div>
+                          <span className="text-sm font-medium text-gray-700">Quiz Generator</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                   <input
+                     value={query}
+                     onChange={(e) => setQuery(e.target.value)}
+                     placeholder="Ask anything..."
+                     className="flex-1 bg-transparent border-none focus:ring-0 outline-none px-3 py-2 text-base max-h-32 overflow-y-auto resize-none"
+                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && askGemini()}
+                   />
+                   
+                   {/* SEND BUTTON */}
+                   <button
+                     onClick={() => askGemini()}
+                     disabled={loading || !query.trim()}
+                     className={`w-9 h-9 flex items-center justify-center rounded-full transition-all shrink-0 ${
+                        loading || !query.trim() 
+                        ? "bg-gray-300 text-gray-400" 
+                        : "bg-black text-white hover:bg-gray-800"
+                     }`}
+                   >
+                     {loading ? (
+                       <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                     ) : (
+                       <Send size={18} className={query.trim() ? "translate-x-[1px]" : ""} />
+                     )}
+                   </button>
+                </div>
+               <p className="text-[10px] text-gray-400 text-center mt-2 px-4 leading-tight">
+                  Stud AI can make mistakes. Check important info.
+               </p>
             </div>
-          </motion.div>
+          </div>
         )}
 
-        {/* ================= HISTORY ================= */}
-        {/* ChatGPT-Style History Sidebar */}
+        {/* History Toggle Button */}
+        <button
+          onClick={() => setShowHistory(!showHistory)}
+          className="fixed top-20 right-4 z-20 p-2 bg-white/90 backdrop-blur rounded-full shadow-md text-gray-600 hover:text-purple-600 border border-gray-200 md:hidden"
+        >
+          <History size={20} />
+        </button>
+
+        {/* ================= HISTORY SIDEBAR ================= */}
         {showHistory && (
           <div 
             className="fixed inset-0 bg-black/20 z-40"
@@ -409,9 +545,8 @@ export default function Dashboard() {
 
               {/* History List */}
               <div className="p-4 space-y-2">
-                {historyLoading && (
-                  <div className="text-center py-8 text-gray-500">Loading...</div>
-                )}
+                {/* ... (Keep existing history logic) ... */}
+                {historyLoading && <div className="text-center py-8">Loading...</div>}
                 
                 {!historyLoading && history.length === 0 && (
                   <div className="text-center py-8 text-gray-500">

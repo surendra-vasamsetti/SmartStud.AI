@@ -116,7 +116,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
+    <div className="min-h-screen flex justify-center items-center bg-gray-100 px-3 sm:px-4 py-6 sm:py-8">
 
       {/* POPUP */}
       {popup && (
@@ -127,10 +127,10 @@ export default function Register() {
         />
       )}
 
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 text-center">
+      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-6 sm:p-8 text-center">
 
-        <h1 className="text-3xl font-semibold mb-2">Create your account</h1>
-        <p className="text-gray-600 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-semibold mb-2">Create your account</h1>
+        <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
           Get personalized learning, AI tools, and more.
         </p>
 
@@ -138,11 +138,11 @@ export default function Register() {
         <button
           onClick={handleGoogleSignup}
           disabled={loading}
-          className="w-full flex items-center gap-3 border rounded-full py-3 px-4 hover:bg-gray-50 transition disabled:opacity-60"
+          className="w-full flex items-center gap-2 sm:gap-3 border rounded-full py-2.5 sm:py-3 px-3 sm:px-4 hover:bg-gray-50 transition disabled:opacity-60 text-sm sm:text-base"
         >
           <img
             src="https://www.svgrepo.com/show/475656/google-color.svg"
-            className="w-6"
+            className="w-5 sm:w-6"
             alt="google"
           />
           <span className="mx-auto">
@@ -151,9 +151,9 @@ export default function Register() {
         </button>
 
         {/* DIVIDER */}
-        <div className="flex items-center my-8">
+        <div className="flex items-center my-6 sm:my-8">
           <div className="flex-1 h-px bg-gray-300"></div>
-          <span className="px-3 text-gray-500">OR</span>
+          <span className="px-2 sm:px-3 text-sm sm:text-base text-gray-500">OR</span>
           <div className="flex-1 h-px bg-gray-300"></div>
         </div>
 
@@ -162,14 +162,14 @@ export default function Register() {
           name="firstName"
           placeholder="First Name"
           onChange={handleChange}
-          className="w-full border rounded-full py-3 px-4 mb-3"
+          className="w-full border rounded-full py-2.5 sm:py-3 px-3 sm:px-4 mb-2.5 sm:mb-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <input
           name="lastName"
           placeholder="Last Name"
           onChange={handleChange}
-          className="w-full border rounded-full py-3 px-4 mb-3"
+          className="w-full border rounded-full py-2.5 sm:py-3 px-3 sm:px-4 mb-2.5 sm:mb-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <input
@@ -177,7 +177,7 @@ export default function Register() {
           type="email"
           placeholder="Email"
           onChange={handleChange}
-          className="w-full border rounded-full py-3 px-4 mb-3"
+          className="w-full border rounded-full py-2.5 sm:py-3 px-3 sm:px-4 mb-2.5 sm:mb-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <input
@@ -185,20 +185,20 @@ export default function Register() {
           type="password"
           placeholder="Password (min 6 chars)"
           onChange={handleChange}
-          className="w-full border rounded-full py-3 px-4 mb-6"
+          className="w-full border rounded-full py-2.5 sm:py-3 px-3 sm:px-4 mb-5 sm:mb-6 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <button
           onClick={handleEmailSignup}
           disabled={loading}
-          className="w-full bg-black text-white rounded-full py-3 text-lg disabled:opacity-60"
+          className="w-full bg-black text-white rounded-full py-2.5 sm:py-3 text-base sm:text-lg disabled:opacity-60 hover:bg-gray-800 transition-colors"
         >
           {loading ? "Creating account..." : "Continue"}
         </button>
 
-        <p className="text-gray-500 text-sm mt-6">
+        <p className="text-gray-500 text-xs sm:text-sm mt-5 sm:mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
+          <Link to="/login" className="text-blue-600 hover:underline font-medium">
             Log in
           </Link>
         </p>

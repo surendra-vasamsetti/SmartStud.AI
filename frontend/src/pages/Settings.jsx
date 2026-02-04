@@ -210,17 +210,25 @@ export default function Settings() {
       <div className={`flex-1 transition-all ${!isMobile ? "md:ml-64" : ""}`}>
         <Navbar toggleSidebar={() => setIsOpen(!isOpen)} username={username} email={email} />
 
-        <div className="pt-24 px-6 pb-12 max-w-6xl mx-auto">
+        <div className="pt-24 px-4 sm:px-6 pb-12 max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Settings</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Sidebar Navigation */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm p-4 sticky top-24">
+              <div className="bg-white rounded-xl shadow-sm p-4 sticky top-24 z-10">
                 {sections.map((section) => (
                   <button
                     key={section.id}
-                    onClick={() => setActiveSection(section.id)}
+                    onClick={() => {
+                      setActiveSection(section.id);
+                      if (isMobile) {
+                        const content = document.getElementById('settings-content');
+                        if (content) {
+                          content.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }
+                    }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                       activeSection === section.id
                         ? "bg-purple-100 text-purple-700"
@@ -235,7 +243,7 @@ export default function Settings() {
             </div>
 
             {/* Content Area */}
-            <div className="lg:col-span-3">
+            <div id="settings-content" className="lg:col-span-3">
               {/* Profile Section */}
               {activeSection === "profile" && (
                 <div className="bg-white rounded-xl shadow-sm p-6">
@@ -430,8 +438,8 @@ export default function Settings() {
                       }
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                     >
-                      <option value="gemini-2.0-flash">Gemini 2.0 Flash (Faster)</option>
-                      <option value="gemini-1.5-pro">Gemini 1.5 Pro (More Accurate)</option>
+                      <option value="gemini-2.5-flash">Gemini 2.5 Flash (Faster)</option>
+                      <option value="gemini-2.5-pro">Gemini 2.5 Pro (More Accurate)</option>
                     </select>
                   </div>
 

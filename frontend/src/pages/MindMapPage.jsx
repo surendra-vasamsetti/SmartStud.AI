@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import MindMapDisplay from "../components/MindMapDisplay";
 import { motion } from "framer-motion";
-import { Network } from "lucide-react";
+import { Network, X } from "lucide-react";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -100,9 +100,12 @@ Return ONLY the JSON object. NO markdown. NO code blocks. NO arrays at root leve
         </h1>
         <button 
           onClick={() => navigate(-1)}
-          className="text-gray-600 hover:text-gray-900 font-semibold"
+          className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-1 group"
+          title="Close"
         >
-          Close
+          <X size={24} className="sm:hidden" />
+          <X size={20} className="hidden sm:block" />
+          <span className="hidden sm:inline font-semibold">Close</span>
         </button>
       </div>
 

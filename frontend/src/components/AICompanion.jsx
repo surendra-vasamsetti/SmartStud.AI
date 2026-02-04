@@ -175,6 +175,7 @@ export default function StudCompanion() {
     }
   }, [location, currentConversation]);
 
+  /* ---------------- SPEECH SYNTHESIS ---------------- */
   const speak = (text) => {
     if (!voiceEnabled || !('speechSynthesis' in window)) {
       setVoiceError("Speech synthesis not supported or disabled");
@@ -508,71 +509,71 @@ export default function StudCompanion() {
       {/* Main Area */}
       <div className="flex-1 flex flex-col relative z-0">
         {/* Header */}
-        <div className="bg-gray-900/50 backdrop-blur-sm border-b border-blue-500/30 p-4">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="bg-gray-900/50 backdrop-blur-sm border-b border-blue-500/30 p-3 sm:p-4">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+            <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-start">
               <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center animate-pulse">
-                  <Volume2 className="text-white" size={24} />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center animate-pulse">
+                  <Volume2 className="text-white" size={20} />
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-ping"></div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full animate-ping"></div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              <div className="text-center sm:text-left">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                   S.T.U.D
                 </h1>
-                <p className="text-xs text-blue-300">
+                <p className="text-[10px] sm:text-xs text-blue-300">
                   Smart Tutor Using Deep-learning
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end overflow-x-auto pb-1 sm:pb-0">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="px-3 py-2 rounded-lg bg-gray-700/50 hover:bg-gray-700/80 text-gray-300 transition-all flex items-center gap-2 border border-gray-600/50"
+                className="px-3 py-2 rounded-lg bg-gray-700/50 hover:bg-gray-700/80 text-gray-300 transition-all flex items-center gap-2 border border-gray-600/50 flex-shrink-0"
               >
                 <LayoutDashboard size={18} />
-                Dashboard
+                <span className="hidden sm:inline">Dashboard</span>
               </button>
               <button
                 onClick={() => setVoiceEnabled(!voiceEnabled)}
-                className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
+                className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 flex-shrink-0 ${
                   voiceEnabled 
                     ? 'bg-blue-600/30 text-blue-300 border border-blue-500/50' 
                     : 'bg-gray-700/30 text-gray-400 border border-gray-600/50'
                 }`}
               >
                 {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
-                Voice
+                <span className="hidden sm:inline">Voice</span>
               </button>
               <button
                 onClick={() => setShowHistory(!showHistory)}
-                className="px-3 py-2 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 transition-all flex items-center gap-2 border border-blue-500/50"
+                className="px-3 py-2 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 transition-all flex items-center gap-2 border border-blue-500/50 flex-shrink-0"
               >
                 <History size={18} />
-                History
+                <span className="hidden sm:inline">History</span>
               </button>
               <button
                 onClick={handleNewSession}
-                className="px-3 py-2 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 transition-all flex items-center gap-2 border border-cyan-500/50"
+                className="px-3 py-2 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 transition-all flex items-center gap-2 border border-cyan-500/50 flex-shrink-0"
               >
                 <Plus size={18} />
-                New Session
+                <span className="hidden sm:inline">New Session</span>
               </button>
             </div>
           </div>
           
           {/* Voice Error Display */}
           {voiceError && (
-              <div className="max-w-4xl mx-auto mt-2 px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center justify-between">
-                <p className="text-red-200 text-sm flex items-center gap-2">
-                  <VolumeX size={16} />
+              <div className="max-w-4xl mx-auto mt-2 px-3 py-2 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center justify-between">
+                <p className="text-red-200 text-xs sm:text-sm flex items-center gap-2">
+                  <VolumeX size={14} />
                   {voiceError}
                 </p>
                 <button 
                   onClick={handleTestVoice}
-                  className="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded font-medium"
+                  className="text-[10px] sm:text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded font-medium"
                 >
                   Test Voice
                 </button>
@@ -581,13 +582,13 @@ export default function StudCompanion() {
         </div>
 
         {/* Avatar & Messages */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
           <div className="max-w-4xl mx-auto">
             {/* Arc Reactor Avatar */}
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <ArcReactorAvatar isSpeaking={isSpeaking} isListening={false} />
               <div className="text-center mt-4">
-                <p className="text-blue-300 text-sm">
+                <p className="text-blue-300 text-xs sm:text-sm">
                   {isSpeaking ? '🔊 Speaking...' : memory?.studyStreak > 0 ? `${memory.studyStreak} day streak 🔥` : 'Ready to assist'}
                 </p>
               </div>
@@ -601,7 +602,7 @@ export default function StudCompanion() {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
                 >
                   <div
-                    className={`max-w-2xl rounded-2xl px-6 py-4 ${
+                    className={`max-w-[90%] sm:max-w-2xl rounded-2xl px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base ${
                       msg.role === 'user'
                         ? 'bg-gradient-to-r from-cyan-600/50 to-blue-600/50 text-white border border-cyan-500/50 backdrop-blur-sm'
                         : 'bg-gray-800/50 text-blue-100 border border-blue-500/30 backdrop-blur-sm'
@@ -619,7 +620,7 @@ export default function StudCompanion() {
 
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-800/50 rounded-2xl px-6 py-4 border border-blue-500/30 backdrop-blur-sm">
+                  <div className="bg-gray-800/50 rounded-2xl px-4 py-3 sm:px-6 sm:py-4 border border-blue-500/30 backdrop-blur-sm">
                     <div className="flex gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -635,39 +636,39 @@ export default function StudCompanion() {
         </div>
 
         {/* Text Control */}
-        <div className="bg-gray-900/50 backdrop-blur-sm border-t border-blue-500/30 p-6">
+        <div className="bg-gray-900/50 backdrop-blur-sm border-t border-blue-500/30 p-3 sm:p-6">
           <div className="max-w-4xl mx-auto">
             {/* Text Input */}
-            <form onSubmit={handleTextSubmit} className="mb-4">
-              <div className="flex gap-3 items-end">
+            <form onSubmit={handleTextSubmit} className="mb-0 sm:mb-4">
+              <div className="flex gap-2 sm:gap-3 items-end">
                 <div className="flex-1 relative">
                   <textarea
                     value={textInput}
                     onChange={(e) => setTextInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
+                    placeholder="Type your message..."
                     disabled={loading}
                     rows={1}
-                    className="w-full px-4 py-3 bg-gray-800/50 border border-blue-500/30 rounded-xl text-blue-100 placeholder-blue-400/50 focus:outline-none focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/20 resize-none backdrop-blur-sm transition-all custom-scrollbar"
-                    style={{ minHeight: '50px', maxHeight: '150px' }}
+                    className="w-full px-4 py-3 bg-gray-800/50 border border-blue-500/30 rounded-xl text-blue-100 placeholder-blue-400/50 focus:outline-none focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/20 resize-none backdrop-blur-sm transition-all custom-scrollbar text-sm sm:text-base"
+                    style={{ minHeight: '44px', maxHeight: '120px' }}
                     onInput={(e) => {
                       e.target.style.height = 'auto';
-                      e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
+                      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
                     }}
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading || !textInput.trim()}
-                  className={`px-6 py-3 rounded-xl transition-all flex items-center gap-2 ${
+                  className={`px-4 sm:px-6 py-3 rounded-xl transition-all flex items-center gap-2 ${
                     loading || !textInput.trim()
                       ? 'bg-gray-700/30 text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/30'
                   }`}
-                  style={{ minHeight: '50px' }}
+                  style={{ minHeight: '44px' }}
                 >
-                  <Send size={20} />
-                  <span className="font-medium">Send</span>
+                  <Send size={18} />
+                  <span className="hidden sm:inline font-medium">Send</span>
                 </button>
               </div>
             </form>

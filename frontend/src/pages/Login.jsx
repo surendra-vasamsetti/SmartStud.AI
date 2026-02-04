@@ -120,7 +120,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
+    <div className="min-h-screen flex justify-center items-center bg-gray-100 px-3 sm:px-4 py-6 sm:py-8">
 
       {/* POPUP */}
       {popup && (
@@ -131,10 +131,10 @@ export default function Login() {
         />
       )}
 
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 text-center">
+      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-6 sm:p-8 text-center">
 
-        <h1 className="text-3xl font-semibold mb-2">Log in</h1>
-        <p className="text-gray-600 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-semibold mb-2">Log in</h1>
+        <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
           Access your personalized dashboard
         </p>
 
@@ -142,11 +142,11 @@ export default function Login() {
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full flex items-center gap-3 border rounded-full py-3 px-4 hover:bg-gray-50 transition disabled:opacity-60"
+          className="w-full flex items-center gap-2 sm:gap-3 border rounded-full py-2.5 sm:py-3 px-3 sm:px-4 hover:bg-gray-50 transition disabled:opacity-60 text-sm sm:text-base"
         >
           <img
             src="https://www.svgrepo.com/show/475656/google-color.svg"
-            className="w-6"
+            className="w-5 sm:w-6"
             alt="google"
           />
           <span className="mx-auto">
@@ -155,29 +155,29 @@ export default function Login() {
         </button>
 
         {/* DIVIDER */}
-        <div className="flex items-center my-8">
+        <div className="flex items-center my-6 sm:my-8">
           <div className="flex-1 h-px bg-gray-300"></div>
-          <span className="px-3 text-gray-500">OR</span>
+          <span className="px-2 sm:px-3 text-sm sm:text-base text-gray-500">OR</span>
           <div className="flex-1 h-px bg-gray-300"></div>
         </div>
 
         {/* EMAIL */}
-        <div className="text-left mb-4">
-          <label>Email</label>
+        <div className="text-left mb-3 sm:mb-4">
+          <label className="text-sm sm:text-base">Email</label>
           <input
             type="email"
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded-full py-3 px-4 mt-1"
+            className="w-full border rounded-full py-2.5 sm:py-3 px-3 sm:px-4 mt-1 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* PASSWORD */}
-        <div className="text-left mb-6">
-          <label>Password</label>
+        <div className="text-left mb-5 sm:mb-6">
+          <label className="text-sm sm:text-base">Password</label>
           <input
             type="password"
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-full py-3 px-4 mt-1"
+            className="w-full border rounded-full py-2.5 sm:py-3 px-3 sm:px-4 mt-1 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -185,14 +185,14 @@ export default function Login() {
         <button
           onClick={handleEmailLogin}
           disabled={loading}
-          className="w-full bg-black text-white rounded-full py-3 text-lg disabled:opacity-60"
+          className="w-full bg-black text-white rounded-full py-2.5 sm:py-3 text-base sm:text-lg disabled:opacity-60 hover:bg-gray-800 transition-colors"
         >
           {loading ? "Logging in..." : "Continue"}
         </button>
 
-        <p className="text-gray-500 text-sm mt-6">
-          Don’t have an account?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline">
+        <p className="text-gray-500 text-xs sm:text-sm mt-5 sm:mt-6">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-blue-600 hover:underline font-medium">
             Sign up
           </Link>
         </p>

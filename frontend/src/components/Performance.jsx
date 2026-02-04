@@ -34,6 +34,17 @@ export default function Performance() {
 
   // Sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const resize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) setSidebarOpen(false);
+    };
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
 
   // Load quiz data
   useEffect(() => {
@@ -104,10 +115,14 @@ export default function Performance() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* SIDEBAR */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
+        isMobile={isMobile}
+      />
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col md:ml-64">
+      <div className={`flex-1 flex flex-col transition-all ${!isMobile ? "md:ml-64" : ""}`}>
         {/* Navbar */}
         <Navbar 
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)} 

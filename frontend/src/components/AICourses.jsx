@@ -97,26 +97,26 @@ export default function AICourses() {
 
   return (
     <Layout>
-      <div className="pt-8 pb-12 px-4 max-w-7xl mx-auto">
+      <div className="pt-6 sm:pt-8 pb-10 sm:pb-12 px-3 sm:px-4 md:px-6 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16"
         >
-          <div className="inline-block px-4 py-1.5 rounded-full bg-soft-primary/10 text-soft-primary font-medium text-sm mb-4">
+          <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-soft-primary/10 text-soft-primary font-medium text-xs sm:text-sm mb-3 sm:mb-4">
              Premium Education
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-soft-text mb-6 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-soft-text mb-4 sm:mb-6 tracking-tight px-2">
             Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-soft-primary to-soft-secondary">Premium Courses</span>
           </h1>
-          <p className="text-soft-muted text-lg leading-relaxed">
+          <p className="text-soft-muted text-base sm:text-lg leading-relaxed px-4">
             Expert-curated learning paths to help you master new skills. From programming basics to advanced concepts.
           </p>
         </motion.div>
 
         {/* Course Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
           {courses.map((course, index) => (
             <motion.div
               key={course.id}
@@ -125,35 +125,35 @@ export default function AICourses() {
               transition={{ delay: index * 0.1 }}
               whileHover={{ y: -5 }}
               className={`
-                bg-white rounded-3xl shadow-soft hover:shadow-soft-hover overflow-hidden border transition-all duration-300 group
+                bg-white rounded-2xl sm:rounded-3xl shadow-soft hover:shadow-soft-hover overflow-hidden border transition-all duration-300 group
                 ${course.borderColor}
               `}
             >
-              <div className={`p-8 h-full flex flex-col`}>
-                <div className="flex justify-between items-start mb-6">
-                  <div className={`p-4 rounded-2xl shadow-sm ${course.color}`}>
-                    {course.icon}
+              <div className={`p-5 sm:p-6 md:p-8 h-full flex flex-col`}>
+                <div className="flex justify-between items-start mb-4 sm:mb-6">
+                  <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm ${course.color}`}>
+                    {React.cloneElement(course.icon, { size: 24, className: `sm:w-8 sm:h-8 ${course.icon.props.className}` })}
                   </div>
-                  <span className="px-3 py-1 bg-gray-50 rounded-full text-xs font-semibold text-gray-600 border border-gray-100">
+                  <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-50 rounded-full text-[10px] sm:text-xs font-semibold text-gray-600 border border-gray-100">
                     {course.level}
                   </span>
                 </div>
                 
-                <h3 className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-soft-primary transition-colors">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 group-hover:text-soft-primary transition-colors">
                   {course.title}
                 </h3>
                 
-                <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6 flex-grow">
                   {course.description}
                 </p>
                 
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-8 pt-4 border-t border-dashed border-gray-100">
-                  <div className="flex items-center gap-1.5">
-                    <Clock size={16} className="text-soft-muted" />
+                <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500 mb-6 sm:mb-8 pt-3 sm:pt-4 border-t border-dashed border-gray-100">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
+                    <Clock size={14} className="sm:w-4 sm:h-4 text-soft-muted" />
                     <span>{course.duration}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Star size={16} className="text-yellow-400 fill-yellow-400" />
+                  <div className="flex items-center gap-1 sm:gap-1.5">
+                    <Star size={14} className="sm:w-4 sm:h-4 text-yellow-400 fill-yellow-400" />
                     <span className="font-medium text-gray-700">4.8</span>
                   </div>
                 </div>
@@ -161,13 +161,13 @@ export default function AICourses() {
                 <button
                   onClick={() => navigate(course.path)}
                   className={`
-                    w-full py-3.5 px-6 rounded-xl text-white font-semibold flex items-center justify-center gap-2 
-                    transition-all shadow-md group-hover:shadow-lg hover:-translate-y-0.5
+                    w-full py-2.5 sm:py-3 md:py-3.5 px-4 sm:px-6 rounded-lg sm:rounded-xl text-white font-semibold flex items-center justify-center gap-1.5 sm:gap-2 
+                    transition-all shadow-md group-hover:shadow-lg hover:-translate-y-0.5 text-sm sm:text-base
                     ${course.btnColor}
                   `}
                 >
                   View Course
-                  <ArrowRight size={18} />
+                  <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
                 </button>
               </div>
             </motion.div>
