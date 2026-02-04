@@ -1,60 +1,26 @@
-    // src/components/RequireQuiz.jsx
-    import React, { useEffect, useState } from "react";
-    import { Navigate } from "react-router-dom";
-    import { doc, getDoc } from "firebase/firestore";
-    import { db } from "../firebase";
-    // src/components/RequireQuiz.jsx
-    import { Navigate } from "react-router-dom";
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
-    export default function RequireQuiz({ children }) {
-    const quizCompleted = sessionStorage.getItem("quizCompleted") === "true";
+export default function RequireQuiz({ children }) {
+  const { currentUser, userData, loading } = useAuth();
 
-    if (!quizCompleted) {
-        return <Navigate to="/topics" replace />;
-    }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
-    return children; // ✅ THIS IS REQUIRED
-    }
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
 
-    export function RequireQuiz({ children }) {
-    const [checked, setChecked] = useState(false);
-    const [allowed, setAllowed] = useState(false);
+  // If user hasn't completed the initial quiz, redirect to topics
+  if (!userData?.hasCompletedQuiz) {
+    return <Navigate to="/select-topic" replace />;
+  }
 
-    useEffect(() => {
-        async function check() {
-        const uid = sessionStorage.getItem("uid");
-        // LocalStorage check (fast)
-        const local = sessionStorage.getItem("quizCompleted") === "true";
-        if (local) {
-            setAllowed(true);
-            setChecked(true);
-            return;
-        }
-
-        // Firestore check (fallback)
-        if (uid) {
-            try {
-            const snap = await getDoc(doc(db, "users", uid));
-            const data = snap.exists() ? snap.data() : null;
-            if (data?.hasCompletedQuiz) {
-                sessionStorage.setItem("quizCompleted", "true");
-                setAllowed(true);
-            } else {
-                setAllowed(false);
-            }
-            } catch (e) {
-            setAllowed(false);
-            }
-        } else {
-            setAllowed(false);
-        }
-        setChecked(true);
-        }
-
-        check();
-    }, []);
-
-    if (!checked) return null; // or loader
-
-    return allowed ? children : <Navigate to="/topics" replace />;
-    }
+  return children;
+}

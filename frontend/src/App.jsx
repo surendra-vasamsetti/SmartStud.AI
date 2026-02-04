@@ -41,12 +41,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { SettingsProvider } from "./contexts/SettingsContext";
+import { AuthProvider } from "./contexts/AuthContext";
 
 export default function App() {
   return (
     <ThemeProvider>
       <SettingsProvider>
-        <BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
       <Routes>
         <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
         <Route path="/get-started" element={<PublicRoute><Home /></PublicRoute>} />
@@ -89,9 +91,9 @@ export default function App() {
         <Route path="/SQLCourseOverview" element={<ProtectedRoute><SQLCourseOverview /></ProtectedRoute>} />
         <Route path="/NetworksCourseOverview" element={<ProtectedRoute><NetworksCourseOverview /></ProtectedRoute>} />
          <Route path="/Performance" element={<ProtectedRoute><Performance /></ProtectedRoute>} />
-        <Route path="/ai-companion" element={<ProtectedRoute><AICompanion /></ProtectedRoute>} />
         </Routes>
-        </BrowserRouter>
+          </BrowserRouter>
+        </AuthProvider>
       </SettingsProvider>
     </ThemeProvider>
   );

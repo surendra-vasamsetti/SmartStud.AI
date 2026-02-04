@@ -21,6 +21,7 @@ import { motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import MarkdownRenderer from "../components/MarkdownRenderer";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -54,10 +55,8 @@ export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  /* USER */
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [uid, setUid] = useState("");
+  const { user, username, email, loading: userLoading } = useCurrentUser();
+  const uid = user?.uid;
 
   /* AI */
   const [query, setQuery] = useState("");
@@ -66,8 +65,6 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showFeatureMenu, setShowFeatureMenu] = useState(false);
-
-
 
   /* HISTORY */
   const [history, setHistory] = useState([]);
@@ -82,19 +79,6 @@ export default function Dashboard() {
     };
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
-  }, []);
-
-  /* LOAD USER */
-  useEffect(() => {
-    async function loadUser() {
-      const userId = sessionStorage.getItem("uid");
-      if (!userId) return;
-      setUid(userId);
-      const user = await getUserDoc(userId);
-      setUsername(user?.firstName || "User");
-      setEmail(user?.email || "No Email");
-    }
-    loadUser();
   }, []);
 
   /* RESTORE RESPONSE FROM SESSION STORAGE */

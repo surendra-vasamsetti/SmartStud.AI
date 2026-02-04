@@ -1,42 +1,27 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
 import StudentSurvey from "./StudentSurvey";
 
 export default function SurveyRoute() {
-  const [allowed, setAllowed] = useState(null);
+  const { currentUser, userData, loading } = useAuth();
 
-  useEffect(() => {
-    const uid = localStorage.getItem("uid");
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
-    if (!uid) {
-      setAllowed(false);
-      return;
-    }
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
 
-    const checkSurveyStatus = async () => {
-      try {
-        const userRef = doc(db, "users", uid);
-        const snap = await getDoc(userRef);
+  // If survey is already completed, they shouldn't be here
+  if (userData?.surveyCompleted) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-        if (snap.exists() && snap.data()?.surveyCompleted === true) {
-          localStorage.setItem("survey_completed", "true");
-          setAllowed(false);
-          return;
-        }
-
-        setAllowed(true);
-      } catch (error) {
-        console.error(error);
-        setAllowed(false);
-      }
-    };
-
-    checkSurveyStatus();
-  }, []);
-
-  if (allowed === null) return null;
-
-  return allowed ? <StudentSurvey /> : <Navigate to="/dashboard" replace />;
+  return <StudentSurvey />;
 }

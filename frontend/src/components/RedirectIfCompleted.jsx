@@ -1,44 +1,15 @@
-// src/components/RedirectIfCompleted.jsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
 
 export function RedirectIfCompleted({ children }) {
-  const [checked, setChecked] = useState(false);
-  const [completed, setCompleted] = useState(false);
+  const { currentUser, userData, loading } = useAuth();
 
-  useEffect(() => {
-    async function check() {
-      const local = sessionStorage.getItem("quizCompleted") === "true";
-      if (local) {
-        setCompleted(true);
-        setChecked(true);
-        return;
-      }
+  if (loading) return null;
 
-      const uid = sessionStorage.getItem("uid");
-      if (uid) {
-        try {
-          const snap = await getDoc(doc(db, "users", uid));
-          const data = snap.exists() ? snap.data() : null;
-          if (data?.hasCompletedQuiz) {
-            sessionStorage.setItem("quizCompleted", "true");
-            setCompleted(true);
-          } else {
-            setCompleted(false);
-          }
-        } catch (e) {
-          setCompleted(false);
-        }
-      } else {
-        setCompleted(false);
-      }
-      setChecked(true);
-    }
-    check();
-  }, []);
+  if (currentUser && userData?.hasCompletedQuiz) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-  if (!checked) return null;
-  return completed ? <Navigate to="/dashboard" replace /> : children;
+  return children;
 }

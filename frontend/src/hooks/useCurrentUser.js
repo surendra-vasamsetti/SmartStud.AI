@@ -1,49 +1,21 @@
-import { useEffect, useState } from "react";
-import { auth, db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { useAuth } from "../contexts/AuthContext";
 
 /**
  * Custom hook to get current user data
- * Returns { username, email, loading }
+ * CONSUMES AuthContext - No independent listeners
+ * Returns { user, username, email, loading }
  */
 export function useCurrentUser() {
-  const [user, setUser] = useState(null);
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { currentUser, userData, loading } = useAuth();
+  
+  // Extract simple fields for backward compatibility
+  const email = currentUser?.email || "";
+  const firstName = userData?.survey?.firstName || userData?.firstName || "User";
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
-      setUser(firebaseUser);
-      if (!firebaseUser) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setEmail(firebaseUser.email || "");
-        
-        // Try to get username from Firestore
-        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          // Check survey data first, then root level
-          const firstName = userData?.survey?.firstName || userData?.firstName || "User";
-          setUsername(firstName);
-        } else {
-          // Fallback to display name from auth
-          setUsername(firebaseUser.displayName?.split(" ")[0] || "User");
-        }
-      } catch (error) {
-        console.error("Error loading user:", error);
-        setUsername(firebaseUser.displayName?.split(" ")[0] || "User");
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  return { user, username, email, loading };
+  return { 
+    user: currentUser, 
+    username: firstName, 
+    email, 
+    loading 
+  };
 }

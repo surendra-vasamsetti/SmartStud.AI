@@ -14,7 +14,7 @@ export default function MyLearning() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const { username, email } = useCurrentUser();
+  const { user, username, email } = useCurrentUser();
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,15 +29,13 @@ export default function MyLearning() {
   }, []);
 
   useEffect(() => {
-    fetchEnrolledCourses();
-  }, []);
+    if (user) {
+      fetchEnrolledCourses();
+    }
+  }, [user]);
 
   const fetchEnrolledCourses = async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    if (!user) return;
 
     try {
       const response = await fetch(`${API_URL}/api/courses/my-courses/${user.uid}`);
