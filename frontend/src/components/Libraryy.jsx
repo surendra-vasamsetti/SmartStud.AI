@@ -5,7 +5,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Upload, X, Trash2 } from "lucide-react";
 import { getUserDoc } from "../utils/firebaseUsers";
 
-const BACKEND_URL = "http://localhost:5000";
+import { API_URL } from "../api/apiConfig";
 
 export default function Library() {
   const [isOpen, setIsOpen] = useState(false);

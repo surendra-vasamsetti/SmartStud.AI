@@ -9,7 +9,7 @@ import { Clock, Book, TrendingUp, PlayCircle, CheckCircle, Sparkles, Loader2, Ar
 import { auth } from "../firebase";
 import SkillTree from "./SkillTree";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { API_URL } from "../api/apiConfig";
 
 export default function CourseOverviewPage() {
   const { courseId } = useParams();

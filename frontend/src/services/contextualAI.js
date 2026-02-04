@@ -2,6 +2,7 @@ import { getStudentMemory } from './agentMemory';
 import { getConversationHistory } from './conversationStorage';
 import { getAllQuizResults } from '../utils/quizTracking';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { API_URL } from '../api/apiConfig';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
@@ -36,7 +37,7 @@ export const generateContextualResponse = async (
 
     // Call backend API
     console.log('Calling backend API...');
-    const response = await fetch('http://localhost:5000/api/companion/chat', {
+    const response = await fetch(`${API_URL}/api/companion/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

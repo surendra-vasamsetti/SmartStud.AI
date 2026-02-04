@@ -9,7 +9,7 @@ import { auth } from "../firebase";
 import CourseThumbnail from "./CourseThumbnail";
 import EnrollmentSuccessModal from "./EnrollmentSuccessModal";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { API_URL } from "../api/apiConfig";
 
 export default function AICourseGenerator() {
   const navigate = useNavigate();

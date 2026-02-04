@@ -8,7 +8,7 @@ import { ChevronDown, ChevronRight, CheckCircle, Circle, ArrowLeft, PlayCircle, 
 import { auth } from "../firebase";
 import MarkdownRenderer from "./MarkdownRenderer";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { API_URL } from "../api/apiConfig";
 
 export default function CourseLearningView() {
   const { courseId } = useParams();

@@ -8,7 +8,7 @@ import { BookOpen, Clock, TrendingUp, Play, Trash2 } from "lucide-react";
 import { auth } from "../firebase";
 import CourseThumbnail from "./CourseThumbnail";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { API_URL } from "../api/apiConfig";
 
 export default function MyLearning() {
   const navigate = useNavigate();

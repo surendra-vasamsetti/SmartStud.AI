@@ -2,8 +2,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { Sparkles, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { API_URL } from '../api/apiConfig';
+
 const GenerationContext = createContext();
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // Simple Toast Notification Component
 const GenerationToast = ({ message, onClose }) => (
