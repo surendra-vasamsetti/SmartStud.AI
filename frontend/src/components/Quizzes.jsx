@@ -42,22 +42,30 @@ const levelConfig = {
 
 // ✅ ADDED: Robust JSON extraction & repair function
 function extractJSON(text) {
-  // 1. Find the outer array brackets
-  const start = text.indexOf('[');
-  const end = text.lastIndexOf(']') + 1;
-  
-  if (start !== -1 && end !== -1 && end > start) {
-    let jsonStr = text.substring(start, end);
+  try {
+    // 1. Find the outer array brackets
+    const start = text.indexOf('[');
+    const end = text.lastIndexOf(']') + 1;
     
-    // 2. Repair common JSON errors
-    // Fix missing commas between objects: } { -> }, {
-    jsonStr = jsonStr.replace(/}\s*{/g, '}, {');
-    
-    // Fix missing commas after properties: "value" "key" -> "value", "key"
-    // CAUTION: This regex identifies double-quotes followed by whitespace/newlines and then another quote
-    jsonStr = jsonStr.replace(/"\s*"/g, '", "');
-    
-    return jsonStr;
+    if (start !== -1 && end !== -1 && end > start) {
+      let jsonStr = text.substring(start, end);
+      
+      // 2. Remove actual control characters (newlines, tabs, etc.) that are NOT escaped
+      // JSON.parse fails on literal newlines inside strings. 
+      // We replace them with spaces. Structural whitespace doesn't matter to JSON.parse.
+      jsonStr = jsonStr.replace(/[\u0000-\u001F]+/g, " "); 
+      
+      // 3. Repair common JSON structural errors
+      // Fix missing commas between objects: } { -> }, {
+      jsonStr = jsonStr.replace(/}\s*{/g, '}, {');
+      
+      // Fix missing commas after properties: "value" "key" -> "value", "key"
+      jsonStr = jsonStr.replace(/"\s*"/g, '", "');
+      
+      return jsonStr.trim();
+    }
+  } catch (e) {
+    console.error("JSON Extraction Error:", e);
   }
   return text;
 }
@@ -114,10 +122,11 @@ export default function Quizzes() {
 
   /* ---------------- SYLLABUS ---------------- */
   const generateSyllabus = async (overrideTopic = null, overrideLevel = null) => {
-    const activeTopic = overrideTopic || topic;
-    const activeLevel = overrideLevel || level;
+    // If called as an event handler, overrideTopic will be the event object
+    const topicToUse = typeof overrideTopic === 'string' ? overrideTopic : topic;
+    const levelToUse = typeof overrideLevel === 'string' ? overrideLevel : level;
 
-    if (!activeTopic.trim()) return;
+    if (!topicToUse || !topicToUse.trim()) return;
 
     setLoading(true);
     setQuiz([]);
@@ -125,7 +134,7 @@ export default function Quizzes() {
     setCurrentQ(0);
 
     try {
-      const prompt = `Create a ${activeLevel}-level syllabus for learning "${activeTopic}" using short bullet points.`;
+      const prompt = `Create a ${levelToUse}-level syllabus for learning "${topicToUse}" using short bullet points.`;
       
       const result = await model.generateContent(prompt);
       const text = result.response.text();
@@ -138,8 +147,8 @@ export default function Quizzes() {
       setStep(2);
       
       // If auto-mode (passed args), chain the quiz generation
-      if (overrideTopic) {
-        setTimeout(() => generateQuiz(text, activeLevel), 1000); 
+      if (typeof overrideTopic === 'string') {
+        setTimeout(() => generateQuiz(text, levelToUse), 1000); 
       }
 
     } catch (err) {
@@ -200,6 +209,7 @@ export default function Quizzes() {
             - ALL string values must be in DOUBLE QUOTES.
             - NO trailing commas.
             - SEPARATE objects with commas.
+            - IMPORTANT: Escape all special characters inside strings (especially newlines should be \n).
             `;
 
       const result = await model.generateContent(prompt);
@@ -367,7 +377,7 @@ Keep it concise, positive, and actionable. Maximum 150 words.
   /* ---------------- UI ---------------- */
   return (
     <Layout>
-      <div className="flex justify-center pt-4 pb-6 sm:pt-8 sm:pb-10">
+      <div className="flex justify-center px-4 pt-4 pb-6 sm:pt-8 sm:pb-10">
           {/* STEP 1 */}
           {step === 1 && (
             <div className="w-full max-w-xl bg-white p-6 sm:p-8 rounded-3xl shadow-soft">
@@ -399,7 +409,7 @@ Keep it concise, positive, and actionable. Maximum 150 words.
               </div>
 
               <button
-                onClick={generateSyllabus}
+                onClick={() => generateSyllabus()}
                 disabled={loading || !topic.trim()}
                 className="w-full bg-soft-primary text-white py-4 rounded-xl font-semibold shadow-soft-hover hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:hover:scale-100"
               >
@@ -441,15 +451,15 @@ Keep it concise, positive, and actionable. Maximum 150 words.
 
           {/* STEP 3 */}
           {step === 3 && quiz.length > 0 && (
-            <div className="w-full max-w-xl bg-white p-6 sm:p-8 rounded-3xl shadow-soft">
-              <div className="flex justify-between mb-4 text-sm font-medium text-gray-500">
+            <div className="w-full max-w-xl bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-soft">
+              <div className="flex justify-between mb-4 text-[10px] sm:text-sm font-medium text-gray-500">
                 <span>Question {currentQ + 1} of {quiz.length}</span>
                 <span>
                    Difficulty: {level}
                 </span>
               </div>
 
-              <div className="h-2 bg-gray-100 rounded-full mb-8 overflow-hidden">
+              <div className="h-1.5 sm:h-2 bg-gray-100 rounded-full mb-6 sm:mb-8 overflow-hidden">
                 <div
                   className="h-full bg-soft-primary rounded-full transition-all duration-300 ease-out"
                   style={{
@@ -458,24 +468,24 @@ Keep it concise, positive, and actionable. Maximum 150 words.
                 />
               </div>
 
-              <h3 className="text-xl font-bold text-gray-800 mb-8 leading-snug">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-6 sm:mb-8 leading-snug">
                 {quiz[currentQ].question}
               </h3>
 
-              <div className="space-y-3">
+              <div className="space-y-2.5 sm:space-y-3">
                 {Object.entries(quiz[currentQ].options).map(([k, v]) => (
                   <button
                     key={k}
                     onClick={() =>
                       setAnswers({ ...answers, [currentQ]: k })
                     }
-                    className={`w-full text-left px-6 py-4 rounded-xl border-2 transition-all ${
+                    className={`w-full text-left px-4 sm:px-6 py-3 sm:py-4 rounded-xl border-2 transition-all text-sm sm:text-base ${
                       answers[currentQ] === k
                         ? "bg-soft-primary/5 border-soft-primary text-soft-primary font-medium"
                         : "bg-white border-transparent hover:bg-gray-50 hover:border-gray-200 text-gray-700"
                     }`}
                   >
-                    <span className="inline-block w-8 font-bold">{k}.</span> {v}
+                    <span className="inline-block w-6 sm:w-8 font-bold text-xs sm:text-base">{k}.</span> {v}
                   </button>
                 ))}
               </div>
@@ -483,7 +493,7 @@ Keep it concise, positive, and actionable. Maximum 150 words.
               <button
                 onClick={handleNextQuestion}
                 disabled={loading}
-                className="w-full mt-8 bg-black text-white py-4 rounded-xl font-semibold shadow-lg hover:bg-gray-800 transition-all disabled:opacity-50"
+                className="w-full mt-6 sm:mt-8 bg-black text-white py-3.5 sm:py-4 rounded-xl font-semibold shadow-lg hover:bg-gray-800 transition-all disabled:opacity-50 text-sm sm:text-base"
               >
                 {loading ? "Submitting..." : (currentQ + 1 === quiz.length ? "Finish Quiz" : "Next Question →")}
               </button>
@@ -492,17 +502,37 @@ Keep it concise, positive, and actionable. Maximum 150 words.
 
           {/* STEP 4 - ENHANCED RESULTS */}
           {step === 4 && result && (
-            <div className="w-full max-w-5xl space-y-8">
+            <div className="w-full max-w-5xl space-y-6 sm:space-y-8">
               {/* Summary Card */}
-              <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-soft text-center">
-                 <div className="inline-flex items-center justify-center p-4 bg-soft-primary/10 rounded-full mb-6">
-                    {percent === 100 ? <Trophy className="w-12 h-12 text-yellow-500" /> : percent >= 70 ? <Star className="w-12 h-12 text-soft-primary" /> : <BarChart2 className="w-12 h-12 text-soft-primary" />}
+              <div className="bg-white p-6 sm:p-10 rounded-2xl sm:rounded-3xl shadow-soft text-center">
+                 <div className="inline-flex items-center justify-center p-3 sm:p-4 bg-soft-primary/10 rounded-full mb-4 sm:mb-6">
+                    {percent === 100 ? <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-yellow-500" /> : percent >= 70 ? <Star className="w-10 h-10 sm:w-12 sm:h-12 text-soft-primary" /> : <BarChart2 className="w-10 h-10 sm:w-12 sm:h-12 text-soft-primary" />}
                  </div>
                  
-                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                     {percent === 100 ? "Perfect Score!" : percent >= 70 ? "Great Job!" : "Keep Learning!"}
                  </h2>
-                 <p className="text-gray-500 mb-8">You scored {percent}% on {topic}</p>
+                 <p className="text-sm sm:text-base text-gray-500 mb-6 sm:mb-8">You scored {percent}% on {topic}</p>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8 max-w-3xl mx-auto">
+                  <div className="bg-green-50 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-1">{result.score}</div>
+                    <div className="text-[10px] sm:text-sm font-medium text-green-800 uppercase tracking-wider">Correct</div>
+                  </div>
+                  <div className="bg-red-50 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <div className="text-2xl sm:text-3xl font-bold text-red-600 mb-1">{result.total - result.score}</div>
+                    <div className="text-[10px] sm:text-sm font-medium text-red-800 uppercase tracking-wider">Incorrect</div>
+                  </div>
+                  <div className="bg-blue-50 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <div className="text-xl sm:text-3xl font-bold text-blue-600 mb-1 leading-tight sm:leading-normal">{Math.floor(result.totalTime / 60)}m {(result.totalTime % 60)}s</div>
+                    <div className="text-[10px] sm:text-sm font-medium text-blue-800 uppercase tracking-wider">Time Taken</div>
+                  </div>
+                  <div className="bg-purple-50 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1">{Math.round(result.totalTime / result.total)}s</div>
+                    <div className="text-[10px] sm:text-sm font-medium text-purple-800 uppercase tracking-wider">Avg / Q</div>
+                  </div>
+                </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 max-w-3xl mx-auto">
@@ -541,13 +571,13 @@ Keep it concise, positive, and actionable. Maximum 150 words.
 
               {/* AI Suggestions */}
               {aiSuggestions && (
-                <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-8 rounded-3xl shadow-soft text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-6 sm:p-10 rounded-2xl sm:rounded-3xl shadow-soft text-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
                   <div className="relative z-10">
-                     <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
+                     <h3 className="text-lg sm:text-xl font-bold mb-4 flex items-center gap-3">
                        <Bot className="w-6 h-6" /> AI Learning Coach
                      </h3>
-                     <div className="text-indigo-50 leading-relaxed whitespace-pre-line text-lg">
+                     <div className="text-indigo-50 leading-relaxed whitespace-pre-line text-sm sm:text-lg">
                        {aiSuggestions}
                      </div>
                   </div>
@@ -555,36 +585,36 @@ Keep it concise, positive, and actionable. Maximum 150 words.
               )}
 
               {/* Detailed Question Analysis */}
-              <div className="space-y-4">
-                 <h3 className="text-2xl font-bold text-gray-800 mb-6 px-2">Detailed Analysis</h3>
+              <div className="space-y-4 sm:space-y-6">
+                 <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 px-2">Detailed Analysis</h3>
                   {result.analysis.map((q, i) => (
                     <div 
                       key={i} 
-                      className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                      className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
                     >
-                      <div className="flex gap-4">
+                      <div className="flex gap-3 sm:gap-4">
                         <div className={`mt-1 flex-shrink-0 ${q.isCorrect ? 'text-green-500' : 'text-red-500'}`}>
-                           {q.isCorrect ? <CheckCircle size={24} /> : <XCircle size={24} />}
+                           {q.isCorrect ? <CheckCircle size={20} className="sm:w-6 sm:h-6" /> : <XCircle size={20} className="sm:w-6 sm:h-6" />}
                         </div>
                         <div className="flex-1">
-                           <h4 className="font-semibold text-lg text-gray-800 mb-3">{q.question}</h4>
+                           <h4 className="font-semibold text-base sm:text-lg text-gray-800 mb-3 sm:mb-4">{q.question}</h4>
                            
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4">
                               <div className={`p-3 rounded-xl border ${q.isCorrect ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
-                                 <span className="text-xs font-semibold uppercase tracking-wider opacity-70 block mb-1">Your Answer</span>
-                                 <span className="font-medium">{q.userAnswer}</span>
+                                 <span className="text-[10px] font-semibold uppercase tracking-wider opacity-70 block mb-1">Your Answer</span>
+                                 <span className="text-sm font-medium">{q.userAnswer}</span>
                               </div>
                               {!q.isCorrect && (
                                 <div className="p-3 rounded-xl border bg-green-50 border-green-100">
-                                   <span className="text-xs font-semibold uppercase tracking-wider opacity-70 block mb-1">Correct Answer</span>
-                                   <span className="font-medium text-green-700">{q.correctAnswer}</span>
+                                   <span className="text-[10px] font-semibold uppercase tracking-wider opacity-70 block mb-1">Correct Answer</span>
+                                   <span className="text-sm font-medium text-green-700">{q.correctAnswer}</span>
                                 </div>
                               )}
                            </div>
 
-                           <div className="bg-gray-50 p-4 rounded-xl text-gray-600 text-sm leading-relaxed">
+                           <div className="bg-gray-50 p-3 sm:p-4 rounded-xl text-gray-600 text-[13px] sm:text-sm leading-relaxed">
                               <strong className="text-gray-900 block mb-1 flex items-center gap-2">
-                                <Lightbulb size={16} className="text-yellow-500" /> Explanation
+                                <Lightbulb size={14} className="text-yellow-500 sm:w-4 sm:h-4" /> Explanation
                               </strong>
                               {q.explanation}
                            </div>
@@ -595,7 +625,7 @@ Keep it concise, positive, and actionable. Maximum 150 words.
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4 pb-12">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 pb-12">
                 <button
                   onClick={() => {
                       setStep(1);
@@ -607,7 +637,7 @@ Keep it concise, positive, and actionable. Maximum 150 words.
                       setTotalQuizTime(0);
                       setAiSuggestions("");
                   }}
-                  className="flex-1 bg-white border-2 border-gray-200 text-gray-700 py-4 rounded-xl font-bold hover:bg-gray-50 transition-colors"
+                  className="flex-1 bg-white border-2 border-gray-200 text-gray-700 py-3.5 sm:py-4 rounded-xl font-bold hover:bg-gray-50 transition-colors text-sm sm:text-base"
                 >
                   Back to Topics
                 </button>
@@ -623,9 +653,9 @@ Keep it concise, positive, and actionable. Maximum 150 words.
                         }
                       } 
                     })}
-                    className="flex-1 bg-soft-primary text-white py-4 rounded-xl font-bold shadow-soft-hover hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+                    className="flex-1 bg-soft-primary text-white py-3.5 sm:py-4 rounded-xl font-bold shadow-soft-hover hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 text-sm sm:text-base"
                   >
-                    <Bot size={20} /> Discuss with AI Companion
+                    <Bot size={18} className="sm:w-5 sm:h-5" /> Discuss with AI
                   </button>
               </div>
             </div>
