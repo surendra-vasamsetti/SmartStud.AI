@@ -33,7 +33,7 @@ export default function Library() {
   /* ---------------- FETCH ALL LIBRARY FILES ---------------- */
   const fetchLibrary = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/library`);
+      const res = await fetch(`${API_URL}/api/library`);
       const data = await res.json();
       setFiles(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -58,7 +58,7 @@ export default function Library() {
     setUploading(true);
 
     try {
-      await fetch(`${BACKEND_URL}/api/library/upload`, {
+      await fetch(`${API_URL}/api/library/upload`, {
         method: "POST",
         body: formData,
       });
@@ -79,7 +79,7 @@ export default function Library() {
     if (!confirmDelete) return;
 
     try {
-      await fetch(`${BACKEND_URL}/api/library/${fileId}`, {
+      await fetch(`${API_URL}/api/library/${fileId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

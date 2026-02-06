@@ -136,7 +136,7 @@ export default function AICourseGenerator() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (data.success || data.message === "Already enrolled") {
         setEnrolledCourse(course);
         setSuccessModalOpen(true);
         // navigate(`/course-overview/${courseId}`);

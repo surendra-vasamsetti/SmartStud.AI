@@ -91,6 +91,7 @@ export default function App() {
         <Route path="/SQLCourseOverview" element={<ProtectedRoute><SQLCourseOverview /></ProtectedRoute>} />
         <Route path="/NetworksCourseOverview" element={<ProtectedRoute><NetworksCourseOverview /></ProtectedRoute>} />
          <Route path="/Performance" element={<ProtectedRoute><Performance /></ProtectedRoute>} />
+         <Route path="/ai-companion" element={<ProtectedRoute><AICompanion /></ProtectedRoute>} />
         </Routes>
           </BrowserRouter>
         </AuthProvider>

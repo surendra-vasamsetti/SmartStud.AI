@@ -6,6 +6,7 @@ import {
   markCompleted,
   saveLesson,
 } from "../utils/courseProgress";
+import { API_URL } from "../api/apiConfig";
 
 /* ================= COURSE ================= */
 const course = [
@@ -72,7 +73,7 @@ export default function JavaCourse() {
     setLoading(true);
 
     const res = await fetch(
-      "http://localhost:5000/api/generate-lesson",
+      `${API_URL}/api/generate-lesson`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -41,15 +41,14 @@ import {
 import { db } from "../firebase";
 
 /* ================= GEMINI ================= */
-const genAI = new GoogleGenerativeAI(
-  import.meta.env.VITE_GEMINI_API_KEY
-);
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
-
 export default function Dashboard() {
   const navigate = useNavigate();
+
+  // Gemini Setup
+  const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+  });
 
   /* SIDEBAR */
   const [isOpen, setIsOpen] = useState(false);
@@ -145,6 +144,7 @@ export default function Dashboard() {
 
   /* ASK GEMINI */
   const askGemini = async (q = query) => {
+    console.log('🚀 Dashboard askGemini triggered', { query: q, loading });
     if (!q.trim()) return;
     setLoading(true);
 
@@ -302,8 +302,8 @@ export default function Dashboard() {
                 )}
 
                 {/* Desktop Features */}
-                {!isMobile && !response && (
-                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 justify-center w-full max-w-2xl px-2">
+                {!isMobile && (
+                  <div className={`grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 justify-center w-full max-w-2xl px-2 ${response ? 'mb-8' : ''}`}>
                     <button
                       onClick={() => {
                         if (!response) {
@@ -403,8 +403,8 @@ export default function Dashboard() {
         </div>
 
 
-        {/* ================= MOBILE BOTTOM SEARCH BAR (ONLY MOBILE) ================= */}
-        {isMobile && (
+        {/* ================= BOTTOM SEARCH BAR (MOBILE ALWAYS, DESKTOP AFTER RESPONSE) ================= */}
+        {(isMobile || response) && (
           <div className="bg-white/80 backdrop-blur-md border-t border-gray-200 p-3 pb-6 fixed bottom-0 left-0 right-0 z-30">
             <div className="max-w-3xl mx-auto">
                 <div className="flex items-center bg-gray-100 rounded-full px-1.5 py-1.5 shadow-inner border border-gray-200 focus-within:border-gray-400 focus-within:ring-1 focus-within:ring-gray-300 transition-all">
@@ -501,7 +501,7 @@ export default function Dashboard() {
         {/* History Toggle Button */}
         <button
           onClick={() => setShowHistory(!showHistory)}
-          className="fixed top-20 right-4 z-20 p-2 bg-white/90 backdrop-blur rounded-full shadow-md text-gray-600 hover:text-purple-600 border border-gray-200 md:hidden"
+          className="fixed top-20 right-4 z-20 p-2 bg-white/90 backdrop-blur rounded-full shadow-md text-gray-600 hover:text-purple-600 border border-gray-200"
         >
           <History size={20} />
         </button>

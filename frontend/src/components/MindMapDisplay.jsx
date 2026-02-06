@@ -177,72 +177,70 @@ export default function MindMapDisplay({ content }) {
 
   // Toggle Node Expand/Collapse
   const toggleNode = useCallback((nodeId) => {
-    setNodes((nds) => {
-      const parentNode = nds.find(n => n.id === nodeId);
-      if (!parentNode) return nds;
+    // 1. First, find if we are expanding or collapsing
+    setNodes((currentNodes) => {
+      const parentNode = currentNodes.find(n => n.id === nodeId);
+      if (!parentNode) return currentNodes;
 
       const isExpanded = parentNode.data.expanded;
       const children = parentNode.data.children;
+      if (!children || children.length === 0) return currentNodes;
 
-      if (!children || children.length === 0) return nds;
-
-      // Update parent expanded state
-      const updatedNodes = nds.map(n => 
+      // Prepare updated nodes (toggle expanded state)
+      const updatedNodes = currentNodes.map(n => 
         n.id === nodeId ? { ...n, data: { ...n.data, expanded: !isExpanded } } : n
       );
 
       if (isExpanded) {
-        // COLLAPSE: Remove all descendants
+        // --- COLLAPSE LOGIC ---
         let descendantIds = [];
         
-        // Calculate descendants and update edges
+        // Use a functional update for edges based on the latest edge state
         setEdges((currentEdges) => {
-          const descendants = getAllDescendants(nodeId, nds, currentEdges);
+          const descendants = getAllDescendants(nodeId, currentNodes, currentEdges);
           descendantIds = descendants.map(d => d.id);
           
-          // Remove edges where either source OR target is a descendant
           return currentEdges.filter(e => 
             !descendantIds.includes(e.target) && !descendantIds.includes(e.source)
           );
         });
         
-        // Filter out descendant nodes
         return updatedNodes.filter(n => !descendantIds.includes(n.id));
 
       } else {
-        // EXPAND: Add immediate children
+        // --- EXPAND LOGIC ---
         const parentPos = parentNode.position;
-        const newNodes = [];
-        const newEdges = [];
+        const newNodesToAdd = [];
+        const newEdgesToAdd = [];
 
-        const childCount = children.length;
         const spacing = 220;
-        const totalWidth = (childCount - 1) * spacing;
+        const totalWidth = (children.length - 1) * spacing;
         const startX = parentPos.x - (totalWidth / 2);
 
         children.forEach((child, index) => {
           const childId = `${nodeId}_${index}`;
+          const edgeId = `e${nodeId}-${childId}`;
           
-          // Check if node already exists
-          const exists = nds.find(n => n.id === childId);
-          if (exists) return;
+          // Only add if node doesn't exist
+          if (!currentNodes.some(n => n.id === childId)) {
+            newNodesToAdd.push({
+              id: childId,
+              type: 'custom',
+              position: { x: startX + (index * spacing), y: parentPos.y + 150 },
+              data: { 
+                label: child.topic || child.name || child.title || "Node", 
+                level: parentNode.data.level + 1,
+                children: child.children || [],
+                expanded: false,
+                expandable: child.children && child.children.length > 0,
+                onToggle: toggleNode
+              }
+            });
+          }
 
-          newNodes.push({
-            id: childId,
-            type: 'custom',
-            position: { x: startX + (index * spacing), y: parentPos.y + 150 },
-            data: { 
-              label: child.topic || child.name || child.title || "Node", 
-              level: parentNode.data.level + 1,
-              children: child.children || [],
-              expanded: false,
-              expandable: child.children && child.children.length > 0,
-              onToggle: toggleNode
-            }
-          });
-
-          newEdges.push({
-            id: `e${nodeId}-${childId}`,
+          // Edge preparation (will be filtered against existing state inside setEdges)
+          newEdgesToAdd.push({
+            id: edgeId,
             source: nodeId,
             target: childId,
             type: 'smoothstep',
@@ -251,17 +249,24 @@ export default function MindMapDisplay({ content }) {
           });
         });
 
-        setEdges(eds => [...eds, ...newEdges]);
+        // Atomic edge update
+        setEdges((prevEdges) => {
+          // Final safety check: only add edges that are truly unique
+          const filteredNewEdges = newEdgesToAdd.filter(
+            newEdge => !prevEdges.some(existingEdge => existingEdge.id === newEdge.id)
+          );
+          return [...prevEdges, ...filteredNewEdges];
+        });
         
         // Fit view after expansion
         setTimeout(() => {
           if (rfInstance) rfInstance.fitView({ padding: 0.2, duration: 500 });
         }, 50);
         
-        return [...updatedNodes, ...newNodes];
+        return [...updatedNodes, ...newNodesToAdd];
       }
     });
-  }, [edges, rfInstance]);
+  }, [rfInstance]); // Removed 'edges' dependency to avoid stale closure issues
 
   if (!initialData) return <div className="text-gray-500">Parsing Mind Map...</div>;
 
@@ -283,6 +288,17 @@ export default function MindMapDisplay({ content }) {
         attributionPosition="bottom-right"
         connectionLineType={ConnectionLineType.Bezier}
         defaultEdgeOptions={{ type: 'default', animated: false }}
+        
+        // Mobile & Interaction Improvements
+        panOnScroll={true}
+        panOnDrag={[1, 2]} // Allow dragging with 1 or 2 fingers
+        selectionOnDrag={false}
+        zoomOnPinch={true}
+        zoomOnDoubleClick={true}
+        elementsSelectable={true}
+        nodesConnectable={false}
+        nodesDraggable={true}
+        preventScrolling={false} // Allow page scroll if dragging outside nodes
       >
         <Controls showInteractive={false} className="bg-white shadow-sm border border-slate-100" />
         <MiniMap nodeStrokeWidth={3} zoomable pannable className="bg-white shadow-sm border border-slate-100 rounded-lg overflow-hidden" />

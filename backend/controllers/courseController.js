@@ -304,9 +304,14 @@ const generateMockOutline = (courseName, description, numChapters, category, dif
     }
   }
 
+  const difficultyLabel = difficulty || 'Beginner';
+  const categoryLabel = category || 'General';
+  
+  const professionalDescription = `Master the fundamentals of ${courseName} with this comprehensive ${difficultyLabel}-level program. Specifically designed for ${categoryLabel} enthusiasts, this course covers the essential pillars of the subject through structured modules, practical topics, and strategic learning paths. Whether you're looking to build a solid foundation or advance your professional skills, this AI-curated curriculum provides the clarity and depth needed to excel.`;
+
   return {
     title: courseName,
-    description: description,
+    description: description || professionalDescription,
     duration: `${numChapters * 2} Weeks`,
     chapters
   };
@@ -327,7 +332,8 @@ export const generateCourse = async (req, res) => {
       const prompt = `Generate a structured educational course OUTLINE with the following details:
       - Title: ${courseName}
       - Title: ${courseName}
-      - User's Intent: ${description} (Use this as a base, but generate a comprehensive, professional, and engaging course description of at least 3-4 sentences.)
+      - User's Intent: ${description}
+      - CRITICAL: Generate a NEW, comprehensive and professional course description (3-4 sentences) based on the intent. DO NOT simply repeat the user's intent. The description should sound like a professional course catalog.
       - Target Duration: ${req.body.targetDuration || 'Flexible'}
       - Number of Chapters: ${numChapters}
       - Difficulty: ${difficulty}
@@ -537,7 +543,7 @@ export const enrollCourse = async (req, res) => {
     if (!userId || !courseId) return res.status(400).json({ success: false, message: 'Missing userId or courseId' });
 
     const existingEnrollment = await Enrollment.findOne({ userId, courseId });
-    if (existingEnrollment) return res.status(400).json({ success: false, message: 'Already enrolled' });
+    if (existingEnrollment) return res.status(200).json({ success: true, message: 'Already enrolled' });
 
     const enrollment = new Enrollment({ userId, courseId, lastAccessedTopicId: 'ch1-t1' });
     await enrollment.save();

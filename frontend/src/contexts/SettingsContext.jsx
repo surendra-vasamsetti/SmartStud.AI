@@ -31,7 +31,14 @@ export function SettingsProvider({ children }) {
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists() && userDoc.data().settings) {
-            setSettings(userDoc.data().settings);
+            const fetched = userDoc.data().settings;
+            // Deep merge or at least top-level merge
+            setSettings({
+              ...defaultSettings,
+              ...fetched,
+              learning: { ...defaultSettings.learning, ...(fetched.learning || {}) },
+              notifications: { ...defaultSettings.notifications, ...(fetched.notifications || {}) }
+            });
           }
         } catch (error) {
           console.error('Error loading settings:', error);

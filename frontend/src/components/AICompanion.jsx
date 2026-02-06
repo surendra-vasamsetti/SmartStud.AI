@@ -79,41 +79,64 @@ export default function StudCompanion() {
   // Note: In React Strict Mode (dev), effects run twice. We use this mechanism to prevent double greetings.
   const hasWelcomedRef = useRef(false);
 
-  // Initialize conversation
+  // Initialize conversation or greet returning user
   useEffect(() => {
-    // Only proceed if we have a user, history is loaded, no current conversation is selected, 
-    // and we haven't welcomed them yet in this component instance.
-    if (uid && !historyLoading && !currentConversation && !hasWelcomedRef.current) {
-      // Check if we already have a recent conversation to avoid creating duplicates on simple reloads
-      if (conversations.length === 0) {
-        hasWelcomedRef.current = true;
-        initializeConversation();
-      }
+    if (uid && !historyLoading && !hasWelcomedRef.current) {
+      hasWelcomedRef.current = true;
+      handleGreeting();
     }
-  }, [uid, historyLoading, currentConversation, conversations.length]);
+  }, [uid, historyLoading]);
 
   // Scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const initializeConversation = async () => {
+  const handleGreeting = async () => {
     try {
-        console.log('Initialize conversation triggered for:', uid);
-        
-        // Final safety check: if conversation was created while waiting
-        if (conversations.length > 0) return;
+      // Small delay to ensure synthesis is ready
+      const delay = (ms) => new Promise(res => setTimeout(res, ms));
+      await delay(800);
 
-        const conversationId = await startNewConversation('STUD AI Session');
-        
-        if (!conversationId) {
-            throw new Error("Failed to create conversation ID");
+      // 1. If no conversations at all, start a fresh one
+      if (conversations.length === 0 && !currentConversation) {
+        await initializeNewConversation();
+        return;
+      }
+
+      // 2. If returning to an existing conversation, provide a greeting
+      if (currentConversation || conversations.length > 0) {
+        // Automatically load the latest conversation if none is active
+        if (!currentConversation && conversations.length > 0) {
+          console.log('Loading most recent conversation:', conversations[0].id);
+          await loadConversation(conversations[0].id);
         }
 
-        // Personalized greeting
+        // If we have a quiz to analyze, skip the generic "Welcome Back"
+        if (location.state?.quizContext) {
+          console.log("📊 Quiz analysis detected, skipping generic greeting.");
+          return;
+        }
+
+        const userNameClean = user?.firstName || user?.username || "buddy";
+        const welcomeBackMsg = await generateWelcomeMessage(uid, userNameClean);
+        
+        if (voiceEnabledRef.current) {
+          speak(welcomeBackMsg);
+        }
+      }
+    } catch (error) {
+      console.error('Error in greeting flow:', error);
+    }
+  };
+
+  const initializeNewConversation = async () => {
+    try {
+        const conversationId = await startNewConversation('STUD AI Session');
+        if (!conversationId) return;
+
         const welcomeMsg = `Hi ${userName}! I am STUD, your personal AI tutor. What can I do for you buddy? Let's discuss anything you want to learn today! 🚀`;
         
-        // Prevent duplicate local messages if state updates weirdly
         const welcomeMessage = {
           role: 'assistant',
           content: welcomeMsg,
@@ -123,14 +146,11 @@ export default function StudCompanion() {
         await saveMessage(uid, conversationId, welcomeMessage);
         setMessages([welcomeMessage]);
         
-        // Auto-speak the greeting when companion loads
-        if (voiceEnabled) {
-          // Small delay to ensure message is rendered first
-          setTimeout(() => speak(welcomeMsg), 500);
+        if (voiceEnabledRef.current) {
+          speak(welcomeMsg);
         }
-
     } catch (error) {
-      console.error('Error initializing conversation:', error);
+      console.error('Error starting new conversation:', error);
     }
   };
 
@@ -165,13 +185,13 @@ export default function StudCompanion() {
       Keep it conversational.]
       `;
 
-      // Small delay to ensure state is stable
+      // Small delay to ensure state is stable and avoid race conditions with conversation loading
       setTimeout(() => {
         sendMessage(analysisPrompt, 'system'); 
         
         // Clear state so it doesn't re-trigger on refresh
         window.history.replaceState({}, document.title);
-      }, 500);
+      }, 1000);
     }
   }, [location, currentConversation]);
 
@@ -186,21 +206,20 @@ export default function StudCompanion() {
     window.speechSynthesis.cancel();
 
     const speakNow = () => {
+      // 🚨 CRITICAL: Re-check voiceEnabled inside the closure to catch state changes
+      if (!voiceEnabledRef.current) return;
+
       const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US'; // 🛠️ Explicit language for cross-platform stability
       utterance.rate = 1.0; 
-      utterance.pitch = 1.1; // Slightly higher pitch for female voice
+      utterance.pitch = 1.1; 
       utterance.volume = 1.0;
 
       // Get available voices
       const voices = window.speechSynthesis.getVoices();
       
       if (voices.length > 0) {
-        // STRICT Female Voice Priority
-        // 1. Google US English (reliable female voice on Chrome/Android)
-        // 2. Microsoft Zira (reliable female voice on Windows)
-        // 3. Any voice containing "Female"
-        // 4. Any voice named "Samantha" (macOS)
-        // 5. Fallback to any English voice
+        // Preferred female voices across different platforms
         const preferredVoice = voices.find(v => v.name === 'Google US English') 
           || voices.find(v => v.name.includes('Microsoft Zira'))
           || voices.find(v => v.name.includes('Google UK English Female'))
@@ -209,68 +228,58 @@ export default function StudCompanion() {
           || voices.find(v => v.lang.startsWith('en'));
         
         if (preferredVoice) {
-          console.log("Selected Voice:", preferredVoice.name);
           utterance.voice = preferredVoice;
         }
       }
 
       utterance.onstart = () => {
-        console.log('🔊 Speech started');
         setIsSpeaking(true);
         setVoiceError(null);
       };
       
       utterance.onend = () => {
-        console.log('🔊 Speech ended');
         setIsSpeaking(false);
       };
       
       utterance.onerror = (event) => {
-        // Handle common audio errors gracefully
         if (event.error === 'not-allowed') {
-          console.log('🔇 Auto-play blocked by browser. Voice will active on next interaction.');
-          // Do NOT disable voice or show error, just let it fail silently this time
-          // It will likely work on next user interaction (click/type)
-        } else if (event.error === 'interrupted') {
-          console.log('Speech interrupted (normal)');
-        } else {
+          console.warn('🔇 Auto-play blocked. Interaction required.');
+        } else if (event.error !== 'interrupted') {
           console.error('🔊 Speech error:', event.error);
-          setVoiceError(`Voice error: ${event.error}`);
         }
         setIsSpeaking(false);
       };
 
       try {
-        console.log('🔊 Attempting to speak:', text.substring(0, 50) + '...');
         window.speechSynthesis.speak(utterance);
-        console.log('🔊 Speech queued successfully');
       } catch (e) {
         console.error("Speak exception:", e);
-        // Don't show error to user, just log it
       }
     };
 
-    // Robust voice loading - ensure we only call speakNow once
+    // Robust voice loading logic
     const voices = window.speechSynthesis.getVoices();
     if (voices.length > 0) {
-      speakNow();
+      // Small delay helps on some browsers after a .cancel()
+      setTimeout(speakNow, 50);
     } else {
-      // Voices not loaded yet, wait for them
       let voicesLoaded = false;
-      window.speechSynthesis.onvoiceschanged = () => {
+      const onVoicesChanged = () => {
         if (!voicesLoaded) {
           voicesLoaded = true;
           window.speechSynthesis.onvoiceschanged = null;
           speakNow();
         }
       };
-      // Fallback if event doesn't fire within 500ms
+      window.speechSynthesis.onvoiceschanged = onVoicesChanged;
+      
+      // Fallback if event doesn't fire
       setTimeout(() => {
         if (!voicesLoaded) {
           voicesLoaded = true;
           speakNow();
         }
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -282,7 +291,8 @@ export default function StudCompanion() {
 
   const handleTextSubmit = async (e) => {
     e?.preventDefault();
-    if (!textInput.trim() || !uid || !currentConversation || loading) return;
+    console.log('🚀 handleTextSubmit [AICompanion] triggered', { hasText: !!textInput.trim(), uid: !!uid, loading });
+    if (!textInput.trim() || !uid || loading) return;
 
     const message = textInput.trim();
     setTextInput('');
@@ -297,9 +307,14 @@ export default function StudCompanion() {
   };
 
   const sendMessage = async (content, source = 'text') => {
-    if (!content.trim() || !uid || !currentConversation || loading) {
-      console.log('sendMessage blocked:', { content: !!content.trim(), uid: !!uid, currentConversation: !!currentConversation, loading });
-      return;
+    if (!content.trim() || !uid || loading) return;
+
+    // Safety fallback: If no conversation active, create one
+    let targetConversation = currentConversation;
+    if (!targetConversation) {
+      console.log('No active conversation, initializing one...');
+      targetConversation = await startNewConversation('Quick Chat');
+      if (!targetConversation) return;
     }
 
     console.log('Sending message:', content, 'from:', source);
@@ -319,12 +334,12 @@ export default function StudCompanion() {
 
     try {
       console.log('Saving user message...');
-      await saveMessage(uid, currentConversation, userMessage);
+      await saveMessage(uid, targetConversation, userMessage);
 
       console.log('Generating AI response...');
       const aiResponse = await generateContextualResponse(
         uid,
-        currentConversation,
+        targetConversation,
         content,
         userName
       );
@@ -338,49 +353,50 @@ export default function StudCompanion() {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      await saveMessage(uid, currentConversation, assistantMessage);
+      await saveMessage(uid, targetConversation, assistantMessage);
 
       console.log('Voice enabled:', voiceEnabled);
       
       // Check for JSON Action (Quiz Intent)
       let finalContent = aiResponse;
       try {
-        // Attempt to extract JSON if embedded in backticks
-        const jsonMatch = aiResponse.match(/```json\n([\s\S]*?)\n```/) || aiResponse.match(/{[\s\S]*}/);
+        // Robust JSON extraction
+        const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/) || 
+                          aiResponse.match(/```\s*([\s\S]*?)\s*```/) ||
+                          aiResponse.match(/{[\s\S]*?}/);
         
         if (jsonMatch) {
-          const jsonStr = jsonMatch[1] || jsonMatch[0];
+          const jsonStr = (jsonMatch[1] || jsonMatch[0]).trim();
           const actionData = JSON.parse(jsonStr);
           
           if (actionData.type === 'ACTION' && actionData.action === 'LAUNCH_QUIZ') {
              console.log("🚀 AGENT ACTION TRIGGERED:", actionData);
              
-             // Speak the confirmation message first
              const confirmationMsg = actionData.message || "Starting quiz now...";
              
              if (voiceEnabled) {
                speak(confirmationMsg);
              }
              
-             // 1. Show the message briefly
              const agentMessage = {
                 role: 'assistant',
                 content: confirmationMsg,
                 metadata: { type: 'action', action: 'quiz_launch' }
              };
              setMessages(prev => [...prev, agentMessage]);
-             await saveMessage(uid, currentConversation, agentMessage);
+             await saveMessage(uid, targetConversation, agentMessage);
 
-             // 2. Redirect after short delay to let voice start
              setTimeout(() => {
-                navigate(`/quizzes?topic=${encodeURIComponent(actionData.params.topic)}&level=${actionData.params.level}&auto=true`);
+                const topic = actionData.params?.topic || 'General';
+                const level = actionData.params?.level || 'beginner';
+                navigate(`/quizzes?topic=${encodeURIComponent(topic)}&level=${level}&auto=true`);
              }, 1500);
              
-             return; // Stop processing normal text flow
+             return; 
           }
         }
       } catch (e) {
-        console.log("Not a JSON action, continuing as normal text");
+        console.log("No valid JSON action found or parsing failed, proceeding as text");
       }
 
       // Speak AI response if voice is enabled (Normal flow)
@@ -392,7 +408,7 @@ export default function StudCompanion() {
       // Auto-title
       if (messages.filter(m => m.role === 'user').length === 0) {
         const title = content.substring(0, 50) + (content.length > 50 ? '...' : '');
-        await updateConversationTitle(uid, currentConversation, title);
+        await updateConversationTitle(uid, targetConversation, title);
         refreshConversations();
       }
 

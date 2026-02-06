@@ -76,6 +76,23 @@ Return ONLY valid JSON in this format:
   }
 });
 
+app.post("/api/ask", async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ error: "Prompt required" });
+  }
+
+  try {
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    res.json({ text });
+  } catch (error) {
+    console.error("Gemini /ask Error:", error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
 /* ================= HEALTH CHECK ================= */
 app.get("/", (req, res) => {
   res.send("✅ Server running successfully");

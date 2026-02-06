@@ -430,16 +430,17 @@ export default function Settings() {
                   <div className="mb-6">
                     <label className="block text-sm font-medium mb-3">AI Model</label>
                     <select
-                      value={settings.learning.aiModel}
+                      value={settings?.learning?.aiModel || "gemini-2.5-flash"}
                       onChange={(e) =>
                         updateSettings({
-                          learning: { ...settings.learning, aiModel: e.target.value },
+                          learning: { ...settings?.learning, aiModel: e.target.value },
                         })
                       }
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                     >
-                      <option value="gemini-2.5-flash">Gemini 2.5 Flash (Faster)</option>
-                      <option value="gemini-2.5-pro">Gemini 2.5 Pro (More Accurate)</option>
+                      <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default - High Speed)</option>
+                      <option value="gemini-2.0-flash">Gemini 2.0 Flash (Stable Alternative)</option>
+                      <option value="gemini-2.5-pro">Gemini 2.5 Pro (Most Powerful)</option>
                     </select>
                   </div>
 

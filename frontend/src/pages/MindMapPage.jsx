@@ -5,12 +5,13 @@ import MindMapDisplay from "../components/MindMapDisplay";
 import { motion } from "framer-motion";
 import { Network, X } from "lucide-react";
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
 export default function MindMapPage() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Gemini Setup
+  const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

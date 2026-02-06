@@ -139,6 +139,7 @@ Respond as a caring, expert tutor who knows this student well:`;
  * Generate a welcome message for new conversation
  */
 export const generateWelcomeMessage = async (userId, userName) => {
+  const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
   try {
     const memory = await getStudentMemory(userId);
     const quizzes = await getAllQuizResults(userId);

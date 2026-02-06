@@ -1,12 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Your Gemini API Key
-const API_KEY = "AIzaSyCodYTF9uysFLgUONSHDUC-xXSdaPnYRKo";
+// Use environment variable for API key
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+if (!API_KEY) {
+  console.error("❌ Gemini API Key missing in environment variables!");
+}
 
 export async function generateQuizQuestions(username) {
+  const genAI = new GoogleGenerativeAI(API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  
   const topic = localStorage.getItem("selectedTopic") || "General";
 
   const prompt = `
